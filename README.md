@@ -184,14 +184,12 @@ get a real reply.
       Projection; [MaAI](https://github.com/MaAI-Kyoto/MaAI) ships a usable
       model. It reads a different signal, so it slots in beside the pause
       gate rather than replacing it, and it is the largest quality jump left.
-- [ ] **Cheaper at scale.** Each session runs its own VAD and turn-model
-      inference today; the weights are shared, the compute is per-session.
-      Batching inference across sessions would cut the cost.
 - [ ] **Match the speaker's prosody.** The selector picks a clip at random
-      within its group. Picking the one whose pitch and energy fit the last
-      utterance adds no runtime cost, because the clips already sit on disk.
-- [ ] **Metrics.** Fire rate and classification latency as Pipecat metrics,
-      so tuning starts from measurements.
+      within its group. Choosing the one whose pitch and energy fit the last
+      utterance would likely want a small prediction model at fire time,
+      trained to map the tail of the user's speech to a clip. Playback stays
+      free — the clips already sit on disk — so the only new cost is that one
+      lightweight inference.
 
 ## License
 

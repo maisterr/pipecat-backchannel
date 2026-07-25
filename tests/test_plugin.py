@@ -5,18 +5,13 @@ between pipelines, and the package-level promises (vendor-free core, typed,
 small public surface).
 """
 
-from pathlib import Path
 
 import pytest
 
-import pipecat_backchannel
 from conftest import (
     PCM,
-    SAMPLE_RATE,
     FakeSTT,
-    FakeTTS,
     FakeTTSService,
-    MemoryCache,
     Sink,
     _transports,
 )

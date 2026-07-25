@@ -1,6 +1,6 @@
 [project]
 name = "pipecat-backchannel"
-version = "0.2.0"
+version = "0.3.0"
 description = "Make voice AI conversations feel live — Pipecat agents that listen back with natural \"mhm\"s and \"yeah\"s while the user is still talking."
 readme = "README.md"
 requires-python = ">=3.11"
