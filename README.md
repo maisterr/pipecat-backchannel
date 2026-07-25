@@ -7,8 +7,8 @@
 
 # pipecat-backchannel
 
-[![PyPI](https://img.shields.io/pypi/v/pipecat-backchannel)](https://pypi.org/project/pipecat-backchannel)
-[![Python](https://img.shields.io/pypi/pyversions/pipecat-backchannel)](https://pypi.org/project/pipecat-backchannel)
+[![PyPI](https://img.shields.io/pypi/v/pipecat-backchannel?cacheSeconds=3600)](https://pypi.org/project/pipecat-backchannel)
+[![Python](https://img.shields.io/pypi/pyversions/pipecat-backchannel?cacheSeconds=3600)](https://pypi.org/project/pipecat-backchannel)
 [![License](https://img.shields.io/badge/license-BSD--2--Clause-blue)](LICENSE)
 [![Pipecat](https://img.shields.io/badge/Pipecat-1.6.0-brightgreen)](https://github.com/pipecat-ai/pipecat)
 
