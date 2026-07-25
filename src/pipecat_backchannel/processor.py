@@ -161,7 +161,7 @@ class BackchannelProcessor(FrameProcessor):
         self._bot_speaking = False
         self._awaiting_own_clip = False
         self._classifying = False
-        self._last_fired_at = 0.0
+        self._last_fired_at = float("-inf")
         self._pause_tasks: set[asyncio.Task] = set()
         self._last_partial = ""
         self._recent_clips: deque[str] = deque(maxlen=recent_clip_memory)

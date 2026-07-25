@@ -139,6 +139,21 @@ async def test_zero_probability_never_fires():
     assert _fired(sink) == []
 
 
+async def test_first_fire_is_not_blocked_by_the_cooldown_near_boot():
+    # Larger than any real machine's uptime, so with the old 0.0 sentinel
+    # ``now - 0.0`` is always inside the cooldown and this fails on every host;
+    # with the -inf sentinel the elapsed time is infinite and it passes.
+    processor, vad, _ = await _make()
+    processor._params.cooldown_s = 1e12
+    sink = await _wire(processor)
+
+    await _speak(processor, vad)
+    await _pause(processor, vad)
+    await asyncio.sleep(0.15)
+
+    assert len(_fired(sink)) == 1
+
+
 async def test_suppressed_while_bot_speaking():
     processor, vad, _ = await _make()
     sink = await _wire(processor)
