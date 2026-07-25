@@ -1,0 +1,70 @@
+[project]
+name = "pipecat-backchannel"
+version = "0.2.0"
+description = "Make voice AI conversations feel live — Pipecat agents that listen back with natural \"mhm\"s and \"yeah\"s while the user is still talking."
+readme = "README.md"
+requires-python = ">=3.11"
+license = "BSD-2-Clause"
+license-files = ["LICENSE"]
+authors = [{ name = "Taras Maister" }]
+keywords = [
+    "pipecat",
+    "voice-ai",
+    "backchannel",
+    "conversational-ai",
+    "turn-taking",
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Multimedia :: Sound/Audio :: Speech",
+]
+
+# Everything this package needs is already an unconditional pipecat-ai
+# dependency: onnxruntime/soxr/numpy (Silero VAD + LocalSmartTurnAnalyzerV3),
+# aiohttp (the Cartesia clip synthesizer), and nltk (optional synonym
+# expansion). No extras, no provider SDKs.
+dependencies = ["pipecat-ai>=1.6.0,<2"]
+
+[project.urls]
+Homepage = "https://github.com/maisterr/pipecat-backchannel"
+Repository = "https://github.com/maisterr/pipecat-backchannel"
+Issues = "https://github.com/maisterr/pipecat-backchannel/issues"
+
+[dependency-groups]
+dev = ["pytest>=8", "pytest-asyncio>=0.24", "ruff>=0.8"]
+# Only the examples/ bot needs provider extras — the library itself needs none.
+examples = [
+    "pipecat-ai[cartesia,cerebras,deepgram,runner,silero,webrtc]",
+    "python-dotenv",
+]
+
+# `uv run examples/bot.py` should just work, so the example's provider extras are
+# installed by default. Library-only work: `uv sync --no-group examples`.
+[tool.uv]
+default-groups = ["dev", "examples"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/pipecat_backchannel"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+# All three come from pipecat internals (audioop import, AudioContextTTSService,
+# importlib.resources.path in the model loaders) — nothing this package can fix.
+# Scoped to those, so warnings from our own code still show.
+filterwarnings = [
+    "ignore::DeprecationWarning:pipecat.*",
+    "ignore:`AudioContextTTSService` is deprecated:DeprecationWarning",
+    "ignore:path is deprecated:DeprecationWarning",
+]
