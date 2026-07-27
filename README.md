@@ -15,6 +15,10 @@
 Your Pipecat agent listens back: quiet "mhm"s and "yeah"s while the user is
 still talking.
 
+## Demo
+
+https://github.com/maisterr/pipecat-backchannel/raw/main/examples/demo.mov
+
 ## Why
 
 Listen to two people on a phone call. While one tells a story, the other keeps
