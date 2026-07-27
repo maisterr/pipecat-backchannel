@@ -17,7 +17,7 @@ still talking.
 
 ## Demo
 
-https://github.com/maisterr/pipecat-backchannel/raw/main/examples/demo.mov
+https://github.com/user-attachments/assets/6c38d03b-4eb6-42bd-8f0d-47a1cfdb1bfc
 
 ## Why
 
