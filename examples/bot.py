@@ -21,7 +21,7 @@ from pipecat.services.deepgram.stt import DeepgramSTTService
 from pipecat.transports.base_transport import BaseTransport, TransportParams
 from pipecat.workers.runner import WorkerRunner
 
-from pipecat_backchannel import Backchannel
+from pipecat_backchannel import Backchannel, BackchannelParams
 
 # Relative to this file, not the shell's cwd, so the example runs from anywhere.
 load_dotenv()
@@ -44,7 +44,12 @@ def make_tts() -> CartesiaTTSService:
 # object rather than building a second one is what keeps the clip inventory, the
 # cache and the sample rate identical between the two — separate instances only
 # ever agree by both happening to find the same files on disk.
-backchannel = Backchannel()
+backchannel = Backchannel(
+    volume=0.6,
+    params=BackchannelParams(
+        min_speech_before_eligible_s=1.5, fire_probability=0.6, cooldown_s=6
+    ),
+)
 
 
 async def run_bot(transport: BaseTransport, runner_args: RunnerArguments) -> None:

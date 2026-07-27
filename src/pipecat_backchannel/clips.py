@@ -45,7 +45,6 @@ DEFAULT_CLIP_GROUPS: dict[str, list[str]] = {
         "Mm-hmm,",
         "Mm.",
         "Mm,",
-        "Right.",
         "Okay.",
     ],
     # Agreement/confirmation — fits when they just stated something concrete.
@@ -80,7 +79,6 @@ DEFAULT_CLIP_GROUPS: dict[str, list[str]] = {
         "Oh really.",
         "Really.",
         "Huh.",
-        "Oh wow.",
     ],
 }
 
@@ -145,7 +143,6 @@ _SURPRISE_SEED_WORDS = [
     "remarkable",
 ]
 _SURPRISE_MARKERS = {
-    "actually",
     "turns out",
     "apparently",
     "wow",
