@@ -12,6 +12,7 @@ from pipecat.frames.frames import (
     InputAudioRawFrame,
     StartFrame,
     TTSAudioRawFrame,
+    TTSSpeakFrame,
     TTSStartedFrame,
     TTSStoppedFrame,
 )
@@ -229,6 +230,34 @@ async def test_recorder_gives_up_within_its_budget():
 
     assert not library.ready
     assert len(_started(sink)) == 1
+
+
+async def test_recorder_records_through_a_tts_that_pauses_itself():
+    """Most streaming TTS services stop reading their input while audio plays,
+    and only resume when the output transport says the bot stopped speaking.
+
+    Nothing downstream has started and the recorder eats the audio, so that
+    signal can never arrive: without the recorder lifting the pause itself, the
+    first clip records and every clip after it times out — one clip per run,
+    forever. The last pause is just as fatal, since the conversation's own first
+    utterance would be stuck behind it.
+    """
+    library = ClipLibrary(
+        groups={"continue": ["Mhm.", "Yeah.", "Right."]}, cache=MemoryCache(prefilled=False)
+    )
+    tts = FakeTTS(pause_frame_processing=True)
+    recorder = ClipRecorder(clips=library, start_timeout_s=1.0, chunk_timeout_s=1.0)
+
+    sink = await _wire_recorder(tts, recorder)
+
+    assert [f.text for f in tts.spoken] == ["Mhm.", "Yeah.", "Right."]
+    assert library.ready
+    assert len(_started(sink)) == 1
+
+    # ...and the TTS is left able to speak for the conversation itself.
+    await tts.queue_frame(TTSSpeakFrame(text="Hello."), FrameDirection.DOWNSTREAM)
+    await asyncio.sleep(0.2)
+    assert tts.spoken[-1].text == "Hello."
 
 
 # ----------------------------------------------------------------------- prewarm

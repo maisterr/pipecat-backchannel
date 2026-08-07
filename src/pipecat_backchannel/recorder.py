@@ -200,12 +200,13 @@ class ClipRecorder(FrameProcessor):
                     )
                     return
                 text = pending[0]
+                await self._unpause_tts()
                 recorded = await self._record_one(text)
                 if recorded is None:
                     logger.warning(
-                        f"Backchannel: the TTS produced no audio for {text!r}. Backchannels "
-                        "stay off; recording retries on the next run. To avoid recording "
-                        "entirely, pass a synthesizer or pre-record the clips."
+                        f"Backchannel: no audio came back from the TTS for {text!r}. "
+                        "Backchannels stay off; recording retries on the next run. To avoid "
+                        "recording entirely, pass a synthesizer or pre-record the clips."
                     )
                     return
                 pcm, rate = recorded
@@ -215,7 +216,32 @@ class ClipRecorder(FrameProcessor):
             logger.info(f"Backchannel: clips ready ({recorded_count} recorded and cached)")
         finally:
             self._recording = False
+            # However this ended, the TTS must be able to read its input again —
+            # otherwise the conversation's own first utterance is stuck behind a
+            # pause taken for a clip nobody ever heard.
+            await self._unpause_tts()
             await self._release()
+
+    async def _unpause_tts(self):
+        """Let the TTS service read its input again after a clip.
+
+        Some services pause their own frame processing while audio is in flight
+        and only resume on the ``BotStoppedSpeakingFrame`` the output transport
+        emits once it has played that audio. This processor ate the audio and the
+        transport has not started, so nothing will ever emit that frame; without
+        this, the next :class:`TTSSpeakFrame` sits in a queue no one is reading.
+
+        Resuming the upstream processor directly, rather than pushing a
+        bot-stopped-speaking frame upstream in the transport's place, keeps the
+        fiction contained: that frame is how turn tracking and user-mute
+        strategies learn the bot has spoken, and it hasn't.
+
+        Costs nothing when the service never paused, so it is unconditional
+        rather than a guess about which services do.
+        """
+        upstream = self.previous
+        if upstream is not None:
+            await upstream.resume_processing_frames()
 
     async def _confirm_rate(self, rate: int):
         """Re-key the library if the TTS emits at a rate the StartFrame didn't predict.

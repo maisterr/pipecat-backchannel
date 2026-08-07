@@ -24,6 +24,7 @@ from pipecat.audio.turn.base_turn_analyzer import (
 from pipecat.audio.vad.vad_analyzer import VADParams, VADState
 from pipecat.clocks.system_clock import SystemClock
 from pipecat.frames.frames import (
+    BotStoppedSpeakingFrame,
     Frame,
     InputAudioRawFrame,
     StartFrame,
@@ -141,11 +142,34 @@ class Sink(FrameProcessor):
 class FakeTTS(FrameProcessor):
     """Answers a TTSSpeakFrame the way a real TTS service does: audio downstream."""
 
-    def __init__(self, *, chunks: int = 2, sample_rate: int = SAMPLE_RATE, answer: bool = True):
+    def __init__(
+        self,
+        *,
+        chunks: int = 2,
+        sample_rate: int = SAMPLE_RATE,
+        answer: bool = True,
+        pause_frame_processing: bool = False,
+    ):
+        """Initialize the fake.
+
+        Args:
+            chunks: How many audio frames an utterance is made of.
+            sample_rate: Rate to stamp on the audio it emits.
+            answer: Whether to answer a TTSSpeakFrame at all. ``False`` is a
+                service that goes silent.
+            pause_frame_processing: Mirror pipecat's ``TTSService`` flag of the
+                same name — stop reading input after each utterance and resume
+                only on a ``BotStoppedSpeakingFrame`` from the output transport.
+                Most streaming services set it (ElevenLabs, Deepgram, Azure,
+                Rime, Groq, LMNT...), and under the recorder that frame can
+                never arrive: the transport has not started and the audio is
+                swallowed.
+        """
         super().__init__()
         self.chunks = chunks
         self.sample_rate = sample_rate
         self.answer = answer
+        self.pause_frame_processing = pause_frame_processing
         self.spoken: list[TTSSpeakFrame] = []
 
     async def process_frame(self, frame: Frame, direction: FrameDirection):
@@ -161,7 +185,12 @@ class FakeTTS(FrameProcessor):
                         FrameDirection.DOWNSTREAM,
                     )
                 await self.push_frame(TTSStoppedFrame(), FrameDirection.DOWNSTREAM)
+            if self.pause_frame_processing:
+                await self.pause_processing_frames()
             return
+
+        if isinstance(frame, BotStoppedSpeakingFrame) and self.pause_frame_processing:
+            await self.resume_processing_frames()
 
         await self.push_frame(frame, direction)
 
